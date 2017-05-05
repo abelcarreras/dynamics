@@ -11,6 +11,7 @@ def read_data(file):
     b[-1,-1] = b[0, 0]
     data = b
 
+
     y = x
     return x, y, data
 
