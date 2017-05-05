@@ -4,6 +4,7 @@ import numpy as np
 import iodata
 
 
+
 # Initial random positions function
 def random_initial(num_rotors, potential, diff=2):
     i_positions = np.array([45.0]*num_rotors)
