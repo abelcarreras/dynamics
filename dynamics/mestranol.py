@@ -1,7 +1,7 @@
-from potential import Potential, Potential_par, Surface_1D_analytic, Surface_2D_analytic, Surface_2D, Surface_1D
-from integration import MolecularDynamics
+from dynamics.potential import Potential, Potential_par, Surface_1D_analytic, Surface_2D_analytic, Surface_2D, Surface_1D
+from dynamics.integration import MolecularDynamics
 import numpy as np
-import iodata
+import dynamics.iodata as iodata
 
 
 # Initial random positions function

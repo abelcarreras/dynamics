@@ -176,14 +176,14 @@ class Potential:
 
     # Total function
     def total_potential(self, coor):
+        coor = np.array(coor)
         potential = 0.0
         for i, pot_func in enumerate(self.complete_interaction):
             potential += pot_func['function'].total_potential(coor[pot_func['coordinates']])
         return potential
 
-
     def partial_derivatives(self, point):
-
+        point = np.array(point, dtype=float)
         partial_derivative = np.zeros_like(point)
         for pot_func in self.complete_interaction:
    #         print pot_func['function'].partial_derivatives_mat(point[pot_func['coordinates']]).T.flatten()
@@ -193,21 +193,17 @@ class Potential:
         return partial_derivative
 
 
-    def partial_derivatives_mat(self, point):
-        partial_derivative = np.zeros_like(point)
-        for i, pot_func in enumerate(self.complete_interaction):
-            partial_derivative[pot_func['coordinates']] += pot_func['function'].partial_derivatives_mat(point[pot_func['coordinates']]).T
-
-        return partial_derivative
-
-# Parallel version
+#    Parallel version
+# ------------------------
 
 def worker_potential(i, function, coordinates):
     return {i: function.total_potential(coordinates)}
 
+
 def worker_derivative(i, function, point, coordinates):
     return { i: {'coordinates': coordinates,
                  'value': function.partial_derivatives_mat(point)}}
+
 
 # Good one
 class Potential_par:
@@ -264,11 +260,3 @@ class Potential_par:
             partial_derivative[pot_func['coordinates']] += pot_func['function'].partial_derivatives_mat(point[pot_func['coordinates']])
 
         return partial_derivative
-
-
-    def partial_derivatives_mat(self, point):
-        partial_derivative = np.zeros_like(point)
-        for i, pot_func in enumerate(self.complete_interaction):
-            partial_derivative[pot_func['coordinates']] += pot_func['function'].partial_derivatives_mat(point[pot_func['coordinates']]).T
-        return partial_derivative
-
