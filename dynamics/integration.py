@@ -16,10 +16,15 @@ class MolecularDynamics:
         if units == None:
             print "Default units"
             # Default Units: Energy=kcal/mol, mass=amu, distance=Amstrong, time=ps
-            kB=0.0019872041 # kcal/(mol*K)
-            initial_conditions['masses'] = initial_conditions['masses'] * 0.00239117  # For now all unit conversion is set to the mass
-            n_dim=len(initial_conditions['coordinates'])
+            kB = 0.0019872041 # kcal/(mol*K)
+            initial_conditions['masses'] = np.array(initial_conditions['masses']) * 0.00239117  # For now all unit conversion is set to the mass
+            n_dim = len(initial_conditions['coordinates'])
             q_thermo = n_dim*kB*temperature
+
+        # set intial conditions to numpy arrays
+        initial_conditions['masses'] = np.array(initial_conditions['masses'])
+        initial_conditions['velocity'] = np.array(initial_conditions['velocity'])
+        initial_conditions['coordinates'] = np.array(initial_conditions['coordinates'])
 
         #intial parameters
         self.time_step = time_step
@@ -145,9 +150,9 @@ if __name__ == "__main__":
     pot_surface3 = Surface_1D_analytic(np.cos, relative=True)
 
     complete_interaction = [{'function': pot_surface3,  'coordinates': [0, 1]},
-                        {'function': pot_surface3, 'coordinates': [1, 2]},
-                        {'function': pot_surface3,  'coordinates': [2, 3]},
-                        {'function': pot_surface3, 'coordinates': [3, 4]}]
+                            {'function': pot_surface3, 'coordinates': [1, 2]},
+                            {'function': pot_surface3,  'coordinates': [2, 3]},
+                            {'function': pot_surface3, 'coordinates': [3, 4]}]
 
 
     pot_obj = Potential(complete_interaction)

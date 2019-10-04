@@ -7,15 +7,16 @@ import multiprocessing
 
 import numpy as np
 
+
 class Surface_2D:
     def __init__(self , x, y, data,
-                 boundary = None,
+                 boundary=None,
                  relative=False):
 
         self.relative = relative
         # Interpolate function
 
-        if isinstance(boundary, type(None)):
+        if boundary is not None:
             self.boundary = [[np.min(x), np.max(x)], [np.min(y), np.max(y)]]
         else:
             self.boundary = boundary
@@ -28,12 +29,12 @@ class Surface_2D:
 
 #        self.bounds_length = [np.max(x) - np.min(x), np.max(y) - np.min(y)]
 
-    #Set periodic boundary conditions
+    # Set periodic boundary conditions
     def interaction_function_periodic(self, coor):
         return self.inter_funct(np.mod(coor[0] - self.boundary[0][0], self.bounds_length[0]) + self.boundary[0][0],
                                  np.mod(coor[1] - self.boundary[1][0], self.bounds_length[1]) + self.boundary[1][0])
 
-   # Total function
+    # Total function
     def total_potential(self, coor2):
         coor = []
         if self.relative:
@@ -44,7 +45,7 @@ class Surface_2D:
 
         return np.sum(self.interaction_function_periodic(coor))
 
-    #Calculate the derivatives
+    # Calculate the derivatives
     def partial_derivative(self, func, point, var=0):
         args = point[:]
         def wraps(x):
@@ -64,7 +65,7 @@ class Surface_1D:
 
         self.relative = relative
 
-        if isinstance(boundary, type(None)):
+        if boundary is not None:
             self.boundary = [[np.min(x), np.max(x)]]
         else:
             self.boundary = boundary
@@ -75,10 +76,10 @@ class Surface_1D:
         self.bonund_length = [np.max(x) - np.min(x)]
         self.bonund_length = [self.boundary[0][1] - self.boundary[0][0]]
 
-    #Set periodic boundary conditions
+    # Set periodic boundary conditions
     def interaction_function_periodic(self, coor):
         return splev(np.mod(coor[0], self.bonund_length[0]), self.inter_funct)
-     #   return self.inter_funct(np.mod(coor[0], self.bonund_length[0]))
+        # return self.inter_funct(np.mod(coor[0], self.bonund_length[0]))
 
     def potential_data_fast(self, vector):
         if self.relative:
@@ -89,11 +90,11 @@ class Surface_1D:
         pot = self.interaction_function_periodic(x)
         return pot
 
-   # Total function
+    # Total function
     def total_potential(self, coor):
         return np.sum(self.interaction_function_periodic(coor))
 
-    #Calculate the derivatives
+    # Calculate the derivatives
     def partial_derivative(self, func, point, var=0):
         args = point[:]
         def wraps(x):
@@ -118,11 +119,11 @@ class Surface_2D_analytic:
         else:
             return self.analitic_function(*coor)
 
-   # Total function
+    # Total function
     def total_potential(self, coor):
         return np.sum(self.interaction_function_periodic(coor))
 
-    #Calculate the derivatives
+    # Calculate the derivatives
     def partial_derivative(self, func, point, var=0):
         args = point[:]
         def wraps(x):
@@ -136,24 +137,25 @@ class Surface_2D_analytic:
 
 
 class Surface_1D_analytic:
-    def __init__(self, analitic_function, relative=False):
+    def __init__(self, analitic_function, relative=False, offset=0):
         self.analitic_function = analitic_function
         self.relative = relative
+        self.position = offset
 
     def potential_data_fast(self, coor):
 
         if self.relative:
             x = coor[0] - coor[1]
         else:
-            x = coor[0]
+            x = coor[0] - self.position
 
         return self.analitic_function(x)
 
-   # Total function
+    # Total function
     def total_potential(self, coor):
         return np.sum(self.potential_data_fast(coor))
 
-    #Calculate the derivatives
+    # Calculate the derivatives
     def partial_derivative(self, func, point, var=0):
         args = point[:]
         def wraps(x):
@@ -162,7 +164,6 @@ class Surface_1D_analytic:
         return derivative(wraps, point[var], dx=1e-6)
 
     def partial_derivatives_mat(self, point):
-
         return np.array([self.partial_derivative(self.potential_data_fast, point, var=i)
                          for i in range(len(point))])
 
@@ -186,23 +187,23 @@ class Potential:
         point = np.array(point, dtype=float)
         partial_derivative = np.zeros_like(point)
         for pot_func in self.complete_interaction:
-   #         print pot_func['function'].partial_derivatives_mat(point[pot_func['coordinates']]).T.flatten()
+            # print pot_func['function'].partial_derivatives_mat(point[pot_func['coordinates']]).T.flatten()
 
             partial_derivative[pot_func['coordinates']] += pot_func['function'].partial_derivatives_mat(point[pot_func['coordinates']]).T.flatten()
 
         return partial_derivative
 
 
-#    Parallel version
-# ------------------------
+#    Parallel version  (very slow for now)
+# --------------------------------------------
 
 def worker_potential(i, function, coordinates):
     return {i: function.total_potential(coordinates)}
 
 
 def worker_derivative(i, function, point, coordinates):
-    return { i: {'coordinates': coordinates,
-                 'value': function.partial_derivatives_mat(point)}}
+    return {i: {'coordinates': coordinates,
+                'value': function.partial_derivatives_mat(point)}}
 
 
 # Good one

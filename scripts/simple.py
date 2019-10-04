@@ -19,7 +19,7 @@ pot_custom = Surface_1D_analytic(custom_function, relative=True)
 
 num_rotors = 5
 
-mass = [1000, 1, 1, 1, 1]
+mass = [10, 1, 1, 1, 1]
 
 complete_interaction = []
 masses = []
@@ -33,14 +33,14 @@ for i in range(num_rotors):
 
 potential_1 = Potential(complete_interaction)
 
-i_positions = np.array([0, 0, 0, 0, 0])
-i_vel = np.array([10, 0, 0, 0, 0])
+i_positions = [0, 0, 0, 0, 0]
+i_vel = [10, 0, 0, 0, 0]
 
 print ('initial energy {} '.format(potential_1.total_potential(i_positions)))
 
 initial_conditions = {'coordinates': i_positions,
                       'velocity': i_vel,
-                      'masses': np.array(masses)}
+                      'masses': masses}
 
 md = MolecularDynamics(initial_conditions=initial_conditions,
                        potential=potential_1,
@@ -66,7 +66,7 @@ pl.figure()
 plot_trajectory(coordinates, potential_1, [0, 1, 2, 3, 4], separated=True)
 
 pl.figure()
-plot_trajectory(coordinates, potential_1, [0, 1], separated=False)
+plot_trajectory(coordinates, potential_1, [0, 4], separated=False)
 
 pl.show()
 
