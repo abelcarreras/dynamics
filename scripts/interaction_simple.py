@@ -6,17 +6,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def custom_function(x):
-    return np.sin(x-1)
-
-
-def interaction(x, k=0.01):
+# Harmonic oscillator 0
+def h_osc_0(x, k=1.1):
     return k * np.square(x)
 
 
-pot_harm_0 = Surface_1D_analytic(np.square, relative=False, offset=0)
-pot_harm_1 = Surface_1D_analytic(np.square, relative=False, offset=1)
+# Harmonic oscillator 1
+def h_osc_1(x, k=1.1):
+    return k * np.square(x)
+
+
+# Harmonic interaction
+def interaction(x, k=0.001):
+    return k * np.square(x)
+
+
+pot_harm_0 = Surface_1D_analytic(h_osc_0, relative=False, offset=0)
+pot_harm_1 = Surface_1D_analytic(h_osc_1, relative=False, offset=1)
 pot_harm_i = Surface_1D_analytic(interaction, relative=True, offset=1)
+
 
 masses = [10, 10]
 complete_interaction = [{'function': pot_harm_0, 'coordinates': [0]},
@@ -26,10 +34,9 @@ complete_interaction = [{'function': pot_harm_0, 'coordinates': [0]},
 potential_1 = Potential(complete_interaction)
 
 i_positions = [0, 1]
-i_velocities = [1, 1]
+i_velocities = [1, 0]
 
 print ('initial energy {} '.format(potential_1.total_potential(i_positions)))
-print ('gradient energy {} '.format(potential_1.partial_derivatives([0,0])))
 
 initial_conditions = {'coordinates': i_positions,
                       'velocity': i_velocities,
@@ -37,7 +44,7 @@ initial_conditions = {'coordinates': i_positions,
 
 md = MolecularDynamics(initial_conditions=initial_conditions,
                        potential=potential_1,
-                       number_of_time_steps=5000,
+                       number_of_time_steps=200000,
                        time_step=0.001)
 
 results = md.calculate_nve()
@@ -49,6 +56,27 @@ total_energy = results['total_energy']
 potential_energy = results['potential_energy']
 kinetic_energy = results['kinetic_energy']
 velocity = np.array(results['velocity'])
+
+
+def get_energy_partition(velocity, masses, coordinates, complete_interaction):
+    n = len(masses)
+    kinetic = np.array([np.square(velocity).T[i] * np.array(masses)[i] * 0.00239117 * 0.5 for i in range(n)])
+
+    potential = []
+    for c in coordinates:
+        potential.append([complete_interaction[0]['function'].potential_data_fast([c[0]]),
+                          complete_interaction[1]['function'].potential_data_fast([c[1]])
+                          ])
+    potential = np.array(potential).T
+    return potential + kinetic
+
+
+ep = get_energy_partition(velocity, masses, coordinates, complete_interaction)
+
+plt.figure()
+plt.title('Total energy partition')
+plt.plot(ep.T)
+
 
 plt.figure()
 plot_energy(time, total_energy, kinetic_energy, potential_energy)
