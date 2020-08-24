@@ -14,7 +14,7 @@ class MolecularDynamics:
                  ):
 
         if units == None:
-            print "Default units"
+            print('Default units')
             # Default Units: Energy=kcal/mol, mass=amu, distance=Amstrong, time=ps
             kB = 0.0019872041 # kcal/(mol*K)
             initial_conditions['masses'] = np.array(initial_conditions['masses']) * 0.00239117  # For now all unit conversion is set to the mass
